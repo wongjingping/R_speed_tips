@@ -40,12 +40,29 @@ get_avg_dist_bos <- function(){
 
 system.time(result <- get_avg_dist_bos()) # ~200s. Feel free to not run this
 
+
+# another example
+# check if carrier is in tailnum
+# using loop
+flights <- cbind(flights, "flag" = 0)
+system.time(
+  for(i in 1:nrow(flights)){
+    flights[i, "flag"] <- grepl(flights[i, "carrier"], flights[i,"tailnum"],fixed=TRUE)
+  } ) # feel free to time this, it took 700 s in our server.
+
+
 # 2) Vectorized indexing
 # a better way to do so is to filter the data frame via a logical index,
 # and then aggregate the results by taking the mean
 flights_bos <- flights[flights$dest == 'BOS',]
 system.time(result <- aggregate(distance ~ flight, flights_bos, mean)) # ~0.037s :)
 
+# using mapply
+system.time(flights$flag2 <- mapply(grepl, pattern = flights$carrier, x = flights$tailnum, fixed=TRUE))
+# only 2 seconds :)
+
+# In general,instead of writing loops,
+# for speed one would use the apply family: sapply, lapply, tapply, mapply, etc.
 
 # 3) ETL with dplyr
 # another way we can do so is to use the dplyr package, 
